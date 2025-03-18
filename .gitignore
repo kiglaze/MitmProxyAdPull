@@ -1,0 +1,6 @@
+saved_images/
+saved_iframes.txt
+.venv
+__pycache__/
+.idea/
+.DS_Store
