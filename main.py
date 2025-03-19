@@ -19,6 +19,7 @@ import mimetypes
 import urllib.parse
 import re
 import logging
+from bs4 import BeautifulSoup
 
 # Directory to save images
 SAVE_DIR = "saved_images"
@@ -43,8 +44,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        file_handler,
-        logging.StreamHandler()
+        file_handler
     ] if file_handler else [logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ def create_logger(log_file, log_level=logging.INFO):
 # Creating logs
 image_logger = create_logger("image_saving.log")
 content_type_logger = create_logger("content_type.log")
-
+iframe_logger = create_logger("iframe_saving.log")
 
 def response(flow: http.HTTPFlow):
     """
@@ -117,12 +117,20 @@ def save_iframe_sources(flow: http.HTTPFlow):
     """
     html_content = flow.response.text
 
-    # Find all iframe sources using regex
-    iframe_srcs = re.findall(r'<iframe[^>]+src="([^"]+)"', html_content)
+    soup = BeautifulSoup(html_content, 'html.parser')
 
-    if iframe_srcs:
-        with open(IFRAME_FILE, "a") as f:
-            for src in iframe_srcs:
-                f.write(src + "\n")
+    # Find all iframe tags
+    iframe_tags = soup.find_all('iframe')
 
-        print(f"✅ Saved {len(iframe_srcs)} iframe URLs to {IFRAME_FILE}")
+    if iframe_tags:
+        with_src = sum(1 for iframe in iframe_tags if iframe.get('src'))
+        without_src = len(iframe_tags) - with_src
+
+        iframe_logger.info(f"NUMBER OF IFRAME TAGS:... {len(iframe_tags)} ")
+        iframe_logger.info(f"IFRAMES WITH SRC: {with_src}")
+        iframe_logger.info(f"IFRAMES WITHOUT SRC: {without_src}")
+
+        for iframe in iframe_tags:
+            iframe_src = iframe.get('src')
+            iframe_logger.info(f"IFRAME SOURCE: {iframe_src}")
+

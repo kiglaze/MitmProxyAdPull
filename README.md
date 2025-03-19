@@ -26,3 +26,11 @@ Preliminary steps:
    - Follow the instructions to install the CA certificate for your operating system and browser.
    - Make sure to trust the certificate in your computer's settings. (at least if using a Mac)
 5. Restart your browser to apply the changes.
+
+
+
+----------
+
+```bash
+brew install tesseract
+```
