@@ -4,3 +4,4 @@ saved_iframes.txt
 __pycache__/
 .idea/
 .DS_Store
+*.log

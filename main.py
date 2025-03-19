@@ -13,12 +13,12 @@
 # compare passing the image to passing the text to the LLM to detect if is an ad
 # do this for a couple of web pages
 
-
 from mitmproxy import http
 import os
 import mimetypes
 import urllib.parse
 import re
+import logging
 
 # Directory to save images
 SAVE_DIR = "saved_images"
@@ -27,12 +27,62 @@ IFRAME_FILE = "saved_iframes.txt"
 # Ensure the save directory exists
 os.makedirs(SAVE_DIR, exist_ok=True)
 
+# Configure logging to log to a file
+try:
+    file_handler = logging.FileHandler("app.log")
+except Exception as e:
+    print(f"Failed to create file handler: {e}")
+    file_handler = None
+
+# Reset any existing log handlers, such as from mitmproxy
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+# Configure logging to log to a file
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        file_handler,
+        logging.StreamHandler()
+    ] if file_handler else [logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
+
+def create_logger(log_file, log_level=logging.INFO):
+    """
+    Create a new logger with a specified log file and log level.
+
+    Args:
+        log_file (str): The path to the log file.
+        log_level (int): The logging level (default is logging.INFO).
+
+    Returns:
+        logging.Logger: Configured logger.
+    """
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+    logger = logging.getLogger(log_file)
+    logger.setLevel(log_level)
+    logger.addHandler(file_handler)
+
+    return logger
+
+# Creating logs
+image_logger = create_logger("image_saving.log")
+content_type_logger = create_logger("content_type.log")
+
 
 def response(flow: http.HTTPFlow):
     """
     Intercept HTTP responses and save images.
     """
     content_type = flow.response.headers.get("content-type", "")
+
+    content_type_logger.info(content_type)
 
     # Check if the response is an image
     if content_type.startswith("image/"):
@@ -58,8 +108,7 @@ def save_image(flow: http.HTTPFlow, content_type: str):
     # Save the image
     with open(filepath, "wb") as f:
         f.write(flow.response.content)
-
-    print(f"Saved image: {filepath}")
+    image_logger.info(f"Saved image: {filepath}")
 
 
 def save_iframe_sources(flow: http.HTTPFlow):
