@@ -34,3 +34,19 @@ Preliminary steps:
 ```bash
 brew install tesseract
 ```
+------------------
+puppeteer (or selenium)
+- use to control which url's are visited. this will allow us to programmatically know what site an image is coming from.
+- can also be part of main.py
+- take screenshot of page before marking ad vs. not ad image process
+  - script in slack
+
+one column with llm detection, one column with manual ad detection
+doesn't matter where the ad is from for now
+
+ignore blank text for now
+
+repo ad
+
+each person do half of manual image checks for now
+
