@@ -12,6 +12,9 @@
 
 # compare passing the image to passing the text to the LLM to detect if is an ad
 # do this for a couple of web pages
+# ###########################################
+# need to test for multiple non-ad images. safe screenshots of webpage.
+# need to validate for negative cases, i.e. images that are not ads.
 
 from mitmproxy import http
 import os
@@ -20,6 +23,8 @@ import urllib.parse
 import re
 import logging
 from bs4 import BeautifulSoup
+
+from urllib.parse import urlparse
 
 # Directory to save images
 SAVE_DIR = "saved_images"
@@ -76,8 +81,15 @@ image_logger = create_logger("image_saving.log")
 content_type_logger = create_logger("content_type.log")
 iframe_logger = create_logger("iframe_saving.log")
 
+
 def response(flow: http.HTTPFlow):
-    """
+    referrer_url = flow.request.headers.get("Referer", None)
+    if referrer_url is not None:
+        os.makedirs(SAVE_DIR + "/" + referrer_url, exist_ok=True)
+    else:
+        os.makedirs(SAVE_DIR + "/" + "no_referrer/", exist_ok=True)
+
+    """ 
     Intercept HTTP responses and save images.
     """
     content_type = flow.response.headers.get("content-type", "")
@@ -86,13 +98,13 @@ def response(flow: http.HTTPFlow):
 
     # Check if the response is an image
     if content_type.startswith("image/"):
-        save_image(flow, content_type)
+        save_image(flow, referrer_url, content_type)
 
     # Extract iframe sources from HTML pages
     elif "text/html" in content_type:
         save_iframe_sources(flow)
 
-def save_image(flow: http.HTTPFlow, content_type: str):
+def save_image(flow: http.HTTPFlow, referrer, content_type: str):
     """
     Save image content from the HTTP response.
     """
@@ -103,7 +115,10 @@ def save_image(flow: http.HTTPFlow, content_type: str):
     parsed_url = urllib.parse.urlparse(flow.request.url)
     filename = f"{parsed_url.netloc}_{os.path.basename(parsed_url.path)}{ext}"
     filename = filename.replace("/", "_")  # Avoid slashes in filenames
-    filepath = os.path.join(SAVE_DIR, filename)
+    if referrer is not None:
+        filepath = os.path.join(SAVE_DIR, referrer, filename)
+    else:
+        filepath = os.path.join(SAVE_DIR, "no_referrer", filename)
 
     # Save the image
     with open(filepath, "wb") as f:
