@@ -1,10 +1,13 @@
 import os
+from lib2to3.pgen2.token import NUMBER
+
 from PIL import Image
 import pytesseract
 import logging
+import sqlite3
 
 # Directory containing images
-IMAGE_DIR = "./saved_images_testing"
+IMAGE_DIR = "./saved_images"
 
 # Ensure the directory exists
 if not os.path.exists(IMAGE_DIR):
@@ -30,6 +33,25 @@ logging.basicConfig(
     ] if file_handler else [logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
+
+
+
+conn = sqlite3.connect('extracted_texts.db')
+cursor = conn.cursor()
+
+# Create table if it doesn't exist
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS image_texts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    text TEXT,
+    is_suspected_ad BOOLEAN DEFAULT NULL,
+    full_filepath TEXT,
+    referrer_filepath_section TEXT
+)
+''')
+conn.commit()
+
 
 
 def create_logger(log_file, log_level=logging.INFO):
@@ -73,11 +95,11 @@ def extract_text_from_image(image_path):
         return text
     except Exception as e:
         print(f"Failed to extract text from {image_path}: {e}")
-        return ""
+        return None
 
 def extract_text_from_images(directory):
     """
-    Extract text from all images in a directory.
+    Extract text from all images in a directory and its sub-directories.
 
     Args:
         directory (str): The path to the directory containing images.
@@ -86,11 +108,16 @@ def extract_text_from_images(directory):
         dict: A dictionary with image file names as keys and extracted text as values.
     """
     extracted_texts = {}
-    for filename in os.listdir(directory):
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
-            image_path = os.path.join(directory, filename)
-            text = extract_text_from_image(image_path)
-            extracted_texts[filename] = text
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
+                image_path = os.path.join(root, filename)
+                text = extract_text_from_image(image_path)
+                referrer_filepath_section = root.split(IMAGE_DIR)[1].lstrip('/')
+                # Insert filename and text into the database
+                cursor.execute('INSERT INTO image_texts (filename, text, full_filepath, referrer_filepath_section) VALUES (?, ?, ?, ?)', (filename, text, image_path, referrer_filepath_section))
+                conn.commit()
+                extracted_texts[filename] = text
     return extracted_texts
 
 if __name__ == "__main__":
