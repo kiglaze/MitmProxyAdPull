@@ -1,9 +1,14 @@
 // screenshot.js
 // Example command for URL https://www.livescience.com/:
+//    node browser_client_interface/screenshot.js https://www.livescience.com/
+//    -- OR --
 //    node browser_client_interface/screenshot.js https://www.livescience.com/ /Users/irisglaze/code/thesis/MitmProxyAdPull/browser_client_interface/livescience.png
 
 const FIREFOX_MAC_EXECUTABLE_PATH = "/Applications/Firefox.app/Contents/MacOS/firefox";
 const CHROME_MAC_EXECUTABLE_PATH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+
+const path = require('path');
+const fs = require('fs');
 
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -11,8 +16,27 @@ puppeteer.use(StealthPlugin());
 
 (async () => {
   const url = process.argv[2];
-  const screenshotPath = process.argv[3];
+  let screenshotPath = process.argv[3];
+
+  if (!url) {
+    console.error("Please provide a URL.");
+    process.exit(1);
+  }
+
+  if (!screenshotPath) {
+    const hostname = new URL(url).hostname.replace(/^www\./, '');
+    screenshotPath = path.join(__dirname, 'screenshots/', `${hostname}.png`);
+  }
+
+  // Create the screenshots directory if it doesn't exist
+  const screenshotsDir = path.join(__dirname, 'screenshots/');
+  if (!fs.existsSync(screenshotsDir)) {
+    fs.mkdirSync(screenshotsDir, { recursive: true });
+    console.log(`Created directory: ${screenshotsDir}`);
+  }
+
   console.log(`URL: ${url}`);
+  console.log(`Saving screenshot to: ${screenshotPath}`);
 
   const browser = await puppeteer.launch({
     headless: true,
