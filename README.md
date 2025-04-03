@@ -38,6 +38,11 @@ In this case, you can skip the manual proxy configuration in your browser, or un
 brew install tesseract
 ```
 
+### Install requirements.txt file
+```bash
+pip install -r requirements.txt
+```
+
 ### Puppeteer User Data Directory Setup
 Set up the user data directory (example is for Mac, and the "puppeteer-profile" directory is created in the home directory, in this case):
 ```bash
