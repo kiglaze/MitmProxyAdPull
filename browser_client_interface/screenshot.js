@@ -70,6 +70,13 @@ async function autoScroll(page){
   });
 
   const page = await browser.newPage();
+
+  page.on('request', req => {
+    if (req.resourceType() === 'image') {
+      console.log(`[IMG REQ] ${req.url()}`);
+    }
+  });
+
   await page.setViewport({ width: 1366, height: 768 });
 
   try {
