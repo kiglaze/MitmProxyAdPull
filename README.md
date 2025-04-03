@@ -1,5 +1,6 @@
 # 
 ## Mitm Proxy Ad Pull -- Running the Program
+### Intercept with mitmdump
 If preliminary step were already completed, just run:
 ```
 mitmdump -s main.py --listen-port 8082
@@ -8,6 +9,17 @@ mitmdump -s main.py --listen-port 8082
 Also, if you have already trusted the certificate for mitmproxy (see preliminary steps), the proxy will be configured by the code in screenshot.js automatically.
 In this case, you can skip the manual proxy configuration in your browser, or unset it if it's set.
 
+### Automate the browser and take a screenshot
+This Node command automatically opens the browser and takes a screenshot of the page at the specified URL. The screenshot is saved in the specified directory.
+```bash
+    node browser_client_interface/screenshot.js https://www.livescience.com/
+```
+OR
+```bash
+    node browser_client_interface/screenshot.js https://www.livescience.com/ /Users/irisglaze/code/thesis/MitmProxyAdPull/browser_client_interface/livescience.png
+```
+
+Sites to check are in listed in ./urls.txt
 
 ## Preliminary steps (if you are new):
 
@@ -71,17 +83,6 @@ repo ad
 
 each person do half of manual image checks for now
 
---------------
-Sites to check are in ./urls.txt
-
-Example command for URL https://www.livescience.com/:
-```bash
-    node browser_client_interface/screenshot.js https://www.livescience.com/
-```
-OR
-```bash
-    node browser_client_interface/screenshot.js https://www.livescience.com/ /Users/irisglaze/code/thesis/MitmProxyAdPull/browser_client_interface/livescience.png
-```
 --------------
 notes from April 3, 2025:
 
