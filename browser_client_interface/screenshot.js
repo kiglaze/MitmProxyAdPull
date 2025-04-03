@@ -62,6 +62,9 @@ async function autoScroll(page){
     '--disk-cache-size=1',
     '--no-sandbox',
     '--disable-setuid-sandbox',
+    '--disable-notifications',
+    '--no-first-run',  // Disable first run check
+    '--no-default-browser-check',  // Disable default browser check
     `--proxy-server=https=127.0.0.1:8082`,
     '--ignore-certificate-errors',
     '--ignore-certificate-errors-spki-list',
@@ -77,31 +80,43 @@ async function autoScroll(page){
 
   const page = await browser.newPage();
 
-  page.on('request', req => {
+/*  page.on('request', req => {
     if (req.resourceType() === 'image') {
       console.log(`[IMG REQ] ${req.url()}`);
     }
-  });
+  });*/
 
   await page.setViewport({ width: 1366, height: 768 });
 
   try {
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
-    await page.goto(url, { waitUntil: 'load', timeout: 180000 });
+    await page.goto(url, { waitUntil: 'load', timeout: 30000 });
     // Auto scroll to the bottom of the page
+    console.log("Auto scrolling...");
     await autoScroll(page);
+    console.log("Done auto scrolling...");
     // Wait for all images to load
     await page.evaluate(async () => {
       const imgs = Array.from(document.images);
-      await Promise.all(imgs.map(img => {
-        if (img.complete) return;
-        return new Promise(resolve => {
-          img.onload = img.onerror = resolve;
+      const loadImage = (img) => {
+        return new Promise((resolve) => {
+          if (img.complete) {
+            resolve();
+          } else {
+            const timeout = setTimeout(() => resolve(), 5000); // 5 seconds timeout
+            img.onload = img.onerror = () => {
+              clearTimeout(timeout);
+              resolve();
+            };
+          }
         });
-      }));
+      };
+      await Promise.all(imgs.map(loadImage));
     });
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    console.log("Planned wait...");
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
+    console.log("Taking screenshot...");
     await page.screenshot({ path: screenshotPath, fullPage: true });
   } catch (err) {
     console.error(`Failed to take screenshot of ${url}:`, err);
