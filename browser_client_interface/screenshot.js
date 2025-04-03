@@ -56,15 +56,21 @@ async function autoScroll(page){
 
   console.log(`URL: ${url}`);
   console.log(`Saving screenshot to: ${screenshotPath}`);
+  args = ['--disable-web-security',
+    '--disable-application-cache',
+    '--media-cache-size=1',
+    '--disk-cache-size=1',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    `--proxy-server=https=127.0.0.1:8082`,
+    '--ignore-certificate-errors',
+    '--ignore-certificate-errors-spki-list',
+    '--user-data-dir=/Users/irisglaze/puppeteer-profile'
+  ]
 
   const browser = await puppeteer.launch({
     headless: false,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--proxy-server=http=127.0.0.1:8082',
-      '--user-data-dir=/Users/irisglaze/puppeteer-profile'
-    ],
+    args: args,
     executablePath: CHROME_MAC_EXECUTABLE_PATH,
     timeout: 0,
   });
