@@ -45,9 +45,11 @@ CREATE TABLE IF NOT EXISTS image_texts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     filename TEXT NOT NULL,
     text TEXT,
-    is_suspected_ad BOOLEAN DEFAULT NULL,
+    is_suspected_ad_auto BOOLEAN DEFAULT NULL,
+    is_suspected_ad_manual BOOLEAN DEFAULT NULL,
     full_filepath TEXT,
-    referrer_filepath_section TEXT
+    referrer_filepath_section TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
 ''')
 conn.commit()
@@ -112,7 +114,16 @@ def extract_text_from_images(directory):
         for filename in files:
             if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
                 image_path = os.path.join(root, filename)
+                try:
+                    image = Image.open(image_path)
+                    if image.size == (1, 1):
+                        continue  # Skip images of size 1x1
+                except Exception as e:
+                    print(f"Failed to open image {image_path}: {e}")
+                    continue
                 text = extract_text_from_image(image_path)
+                if not text.strip():
+                    continue  # Skip images with no text found
                 referrer_filepath_section = root.split(IMAGE_DIR)[1].lstrip('/')
                 # Insert filename and text into the database
                 cursor.execute('INSERT INTO image_texts (filename, text, full_filepath, referrer_filepath_section) VALUES (?, ?, ?, ?)', (filename, text, image_path, referrer_filepath_section))
