@@ -62,8 +62,8 @@ async function autoScroll(page){
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--ignore-certificate-errors',
       '--proxy-server=http=127.0.0.1:8082',
+      '--user-data-dir=/Users/irisglaze/puppeteer-profile'
     ],
     executablePath: CHROME_MAC_EXECUTABLE_PATH,
     timeout: 0,
