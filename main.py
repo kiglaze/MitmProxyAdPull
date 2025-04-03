@@ -81,11 +81,16 @@ image_logger = create_logger("image_saving.log")
 content_type_logger = create_logger("content_type.log")
 iframe_logger = create_logger("iframe_saving.log")
 
+def sanitize_filename(filename):
+    return re.sub(r'[^a-zA-Z0-9_\-\.]', '_', filename)
 
 def response(flow: http.HTTPFlow):
+    url = flow.request.url
+    print(">>> ", flow.request.method, url)
     referrer_url = flow.request.headers.get("Referer", None)
     if referrer_url is not None:
-        os.makedirs(SAVE_DIR + "/" + referrer_url, exist_ok=True)
+        sanitized_referrer = sanitize_filename(referrer_url)
+        os.makedirs(os.path.join(SAVE_DIR, sanitized_referrer), exist_ok=True)
     else:
         os.makedirs(SAVE_DIR + "/" + "no_referrer/", exist_ok=True)
 
@@ -116,7 +121,7 @@ def save_image(flow: http.HTTPFlow, referrer, content_type: str):
     filename = f"{parsed_url.netloc}_{os.path.basename(parsed_url.path)}{ext}"
     filename = filename.replace("/", "_")  # Avoid slashes in filenames
     if referrer is not None:
-        filepath = os.path.join(SAVE_DIR, referrer, filename)
+        filepath = os.path.join(SAVE_DIR, sanitize_filename(referrer), filename)
     else:
         filepath = os.path.join(SAVE_DIR, "no_referrer", filename)
 
