@@ -5,3 +5,6 @@ __pycache__/
 .idea/
 .DS_Store
 *.log
+node_modules/
+browser_client_interface/screenshots/
+
