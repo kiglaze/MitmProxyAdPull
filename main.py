@@ -16,7 +16,7 @@
 # need to test for multiple non-ad images. safe screenshots of webpage.
 # need to validate for negative cases, i.e. images that are not ads.
 
-from mitmproxy import http
+from mitmproxy import http, ctx
 import os
 import mimetypes
 import urllib.parse
@@ -84,10 +84,12 @@ def sanitize_filename(filename):
     return re.sub(r'[^a-zA-Z0-9_\-\.]', '_', filename)
 
 def response(flow: http.HTTPFlow):
+    custom_value = ctx.options.my_custom_arg
     print(f"[REQUEST] {flow.request.pretty_url}")
     url = flow.request.url
     #print(">>> ", flow.request.method, url)
-    referrer_url = flow.request.headers.get("Referer", None)
+    #referrer_url = flow.request.headers.get("Referer", None)
+    referrer_url = custom_value
     if referrer_url is not None:
         sanitized_referrer = sanitize_filename(referrer_url)
         os.makedirs(os.path.join(SAVE_DIR, sanitized_referrer), exist_ok=True)
@@ -104,6 +106,14 @@ def response(flow: http.HTTPFlow):
     # Check if the response is an image
     if content_type.startswith("image/"):
         save_image(flow, referrer_url, content_type)
+
+def load(loader):
+    loader.add_option(
+        name = "my_custom_arg",
+        typespec = str,
+        default = "default_value",
+        help = "A custom argument passed to mitmdump"
+    )
 
 def save_image(flow: http.HTTPFlow, referrer, content_type: str):
     """

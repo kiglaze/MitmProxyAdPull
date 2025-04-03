@@ -3,11 +3,12 @@
 ### Intercept with mitmdump
 If preliminary step were already completed, just run:
 ```
-mitmdump -s main.py --listen-port 8082
+mitmdump -s main.py --listen-port 8082 --set my_custom_arg="<directory_name_for_saved_image_output>"
 ```
-... and visit the target website in your browser.
+where `<directory_name_for_saved_image_output>` is the directory where you want to save the images (under saved_images).
+
+... and visit the target website by using the Node JS script command listed below.
 Also, if you have already trusted the certificate for mitmproxy (see preliminary steps), the proxy will be configured by the code in screenshot.js automatically.
-In this case, you can skip the manual proxy configuration in your browser, or unset it if it's set.
 
 ### Automate the browser and take a screenshot
 This Node command automatically opens the browser and takes a screenshot of the page at the specified URL. The screenshot is saved in the specified directory.
