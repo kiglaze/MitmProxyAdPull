@@ -22,7 +22,7 @@ import mimetypes
 import urllib.parse
 import re
 import logging
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 
 from urllib.parse import urlparse
 
@@ -85,8 +85,9 @@ def sanitize_filename(filename):
     return re.sub(r'[^a-zA-Z0-9_\-\.]', '_', filename)
 
 def response(flow: http.HTTPFlow):
+    print(f"[REQUEST] {flow.request.pretty_url}")
     url = flow.request.url
-    print(">>> ", flow.request.method, url)
+    #print(">>> ", flow.request.method, url)
     referrer_url = flow.request.headers.get("Referer", None)
     if referrer_url is not None:
         sanitized_referrer = sanitize_filename(referrer_url)
@@ -104,10 +105,6 @@ def response(flow: http.HTTPFlow):
     # Check if the response is an image
     if content_type.startswith("image/"):
         save_image(flow, referrer_url, content_type)
-
-    # Extract iframe sources from HTML pages
-    elif "text/html" in content_type:
-        save_iframe_sources(flow)
 
 def save_image(flow: http.HTTPFlow, referrer, content_type: str):
     """
@@ -130,27 +127,4 @@ def save_image(flow: http.HTTPFlow, referrer, content_type: str):
         f.write(flow.response.content)
     image_logger.info(f"Saved image: {filepath}")
 
-
-def save_iframe_sources(flow: http.HTTPFlow):
-    """
-    Extracts and saves iframe sources from HTML responses.
-    """
-    html_content = flow.response.text
-
-    soup = BeautifulSoup(html_content, 'html.parser')
-
-    # Find all iframe tags
-    iframe_tags = soup.find_all('iframe')
-
-    if iframe_tags:
-        with_src = sum(1 for iframe in iframe_tags if iframe.get('src'))
-        without_src = len(iframe_tags) - with_src
-
-        iframe_logger.info(f"NUMBER OF IFRAME TAGS:... {len(iframe_tags)} ")
-        iframe_logger.info(f"IFRAMES WITH SRC: {with_src}")
-        iframe_logger.info(f"IFRAMES WITHOUT SRC: {without_src}")
-
-        for iframe in iframe_tags:
-            iframe_src = iframe.get('src')
-            iframe_logger.info(f"IFRAME SOURCE: {iframe_src}")
 
