@@ -55,7 +55,6 @@ async function autoScroll(page){
   }
 
   console.log(`URL: ${url}`);
-  console.log(`Saving screenshot to: ${screenshotPath}`);
   args = ['--disable-web-security',
     '--disable-application-cache',
     '--media-cache-size=1',
@@ -87,13 +86,13 @@ async function autoScroll(page){
   });*/
 
   await page.setViewport({ width: 1366, height: 768 });
-
+  console.log(`Visiting page in browser with Puppeteer...`);
   try {
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
-    await page.goto(url, { waitUntil: 'load', timeout: 30000 });
+    await page.goto(url, { waitUntil: 'load', timeout: 180000 });
     // Auto scroll to the bottom of the page
     console.log("Auto scrolling...");
-    await autoScroll(page);
+    //await autoScroll(page);
     console.log("Done auto scrolling...");
     // Wait for all images to load
     await page.evaluate(async () => {
