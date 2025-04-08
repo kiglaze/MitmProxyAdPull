@@ -13,6 +13,7 @@ def activate_proxy(website, portNum):
         f"mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > /dev/null &")
 
 def deactivate_proxy(instance_port):
+    print('De-activating proxy...')
     r = subprocess.Popen("kill -9 $(lsof -ti:{})".format(instance_port), shell =True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = r.communicate()
 
@@ -39,11 +40,10 @@ def take_screenshot(url):
 
     try:
         print(f"[+] Capturing {url} → {output_path}")
-        subprocess.run([
-            "node",
-            "browser_client_interface/screenshot.js",
-            url
-        ], check=True)
+        process = subprocess.Popen(["node", "browser_client_interface/screenshot.js", url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = process.communicate()
+        print(out)
+        process.wait()
     except subprocess.CalledProcessError as e:
         print(f"[!] Failed to capture {url}: {e}")
 
@@ -62,15 +62,9 @@ def main():
         activate_proxy(url, PORT_NUM)
         time.sleep(5)
         take_screenshot(url)
-        time.sleep(5)
-
-        process = subprocess.Popen([command, script_path, url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        out, err = process.communicate()
-        print(out)
 
         # Wait for the process to finish
-        process.wait()
+
         time.sleep(3)
 
         # Deactivate the proxy
