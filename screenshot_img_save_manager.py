@@ -40,6 +40,7 @@ def take_screenshot(url):
 
     try:
         print(f"[+] Capturing {url} → {output_path}")
+        print(f"[*] Running command: node browser_client_interface/screenshot.js {url}")
         process = subprocess.Popen(["node", "browser_client_interface/screenshot.js", url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = process.communicate()
         print(out)
