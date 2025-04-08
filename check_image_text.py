@@ -1,5 +1,4 @@
 import os
-from lib2to3.pgen2.token import NUMBER
 
 from PIL import Image
 import pytesseract
@@ -48,7 +47,7 @@ CREATE TABLE IF NOT EXISTS image_texts (
     is_suspected_ad_auto BOOLEAN DEFAULT NULL,
     is_suspected_ad_manual BOOLEAN DEFAULT NULL,
     full_filepath TEXT,
-    referrer_filepath_section TEXT,
+    url_visited_directory TEXT,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
 ''')
@@ -122,11 +121,11 @@ def extract_text_from_images(directory):
                     print(f"Failed to open image {image_path}: {e}")
                     continue
                 text = extract_text_from_image(image_path)
-                if not text.strip():
+                if text is None or not text.strip():
                     continue  # Skip images with no text found
-                referrer_filepath_section = root.split(IMAGE_DIR)[1].lstrip('/')
+                url_visited_directory = root.split(IMAGE_DIR)[1].lstrip('/')
                 # Insert filename and text into the database
-                cursor.execute('INSERT INTO image_texts (filename, text, full_filepath, referrer_filepath_section) VALUES (?, ?, ?, ?)', (filename, text, image_path, referrer_filepath_section))
+                cursor.execute('INSERT INTO image_texts (filename, text, full_filepath, url_visited_directory) VALUES (?, ?, ?, ?)', (filename, text, image_path, url_visited_directory))
                 conn.commit()
                 extracted_texts[filename] = text
     return extracted_texts
