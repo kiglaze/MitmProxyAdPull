@@ -27,7 +27,23 @@ async function autoScroll(page){
           clearInterval(timer);
           resolve();
         }
-      }, 300);
+      }, 200);
+    });
+  });
+  // Scroll back to the top
+  await page.evaluate(async () => {
+    await new Promise((resolve) => {
+      let currentPosition = document.documentElement.scrollTop || document.body.scrollTop;
+      const distance = 500;
+      const timer = setInterval(() => {
+        window.scrollBy(0, -distance);
+        currentPosition -= distance;
+
+        if (currentPosition <= 0) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 200);
     });
   });
 }
@@ -92,7 +108,7 @@ async function autoScroll(page){
     await page.goto(url, { waitUntil: 'load', timeout: 180000 });
     // Auto scroll to the bottom of the page
     console.log("Auto scrolling...");
-    //await autoScroll(page);
+    await autoScroll(page);
     console.log("Done auto scrolling...");
     // Wait for all images to load
     await page.evaluate(async () => {
