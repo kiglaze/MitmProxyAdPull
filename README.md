@@ -98,3 +98,9 @@ https://github.com/ahsan238/Ad-Compliance/blob/main/src/server.py
 def activateProxy(website, portNum):
 def isPortActive(instance_port):
 after node process is run, disconnect mitmdump process (one connection = 1 website url of focus)
+-----
+
+do urls have text or not text if I visit them live? count with words vs without words
+test 25-50 total urls manually
+
+also can see if my words pytesseract script extracts text from the Disney image (img.3lift.com_.webp from accuweather)
