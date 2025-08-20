@@ -20,7 +20,13 @@ OR
     node browser_client_interface/screenshot.js https://www.livescience.com/ /Users/irisglaze/code/thesis/MitmProxyAdPull/browser_client_interface/livescience.png
 ```
 
+### BOTH of previous two steps for multiple URLs (mitmdump and screenshot-taking Node command)
+screenshot_img_save_manager.py
+
 Sites to check are in listed in ./urls.txt
+
+### Onces images are saved, extract the text from the images.
+check_image_text.py
 
 ## Preliminary steps (if you are new):
 
