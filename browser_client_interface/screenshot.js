@@ -120,7 +120,7 @@ async function autoScroll(page){
   ]
 
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: 'new',
     args: args,
     executablePath: CHROME_MAC_EXECUTABLE_PATH,
     timeout: 120000,
@@ -138,7 +138,7 @@ async function autoScroll(page){
   console.log(`Visiting page in browser with Puppeteer...`);
   try {
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 180000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 180000 });
     // Auto scroll to the bottom of the page
     console.log("Auto scrolling...");
     await autoScroll(page);
