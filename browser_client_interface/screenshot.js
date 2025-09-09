@@ -9,9 +9,42 @@ const CHROME_MAC_EXECUTABLE_PATH = "/Applications/Google Chrome.app/Contents/Mac
 const path = require('path');
 const fs = require('fs');
 
+// For logging.
+const winston = require('winston');
+
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
+
+
+function createLogger(logFile, logLevel = 'info') {
+  /**
+   * Create a new logger with a specified log file and log level.
+   *
+   * Args:
+   *   logFile (string): The path to the log file.
+   *   logLevel (string): The logging level (default is 'info').
+   *
+   * Returns:
+   *   winston.Logger: Configured logger.
+   */
+  return winston.createLogger({
+    level: logLevel,
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.printf(({ timestamp, level, message }) => {
+        return `${timestamp} - ${level.toUpperCase()} - ${message}`;
+      })
+    ),
+    transports: [
+      new winston.transports.Console(),
+      new winston.transports.File({ filename: logFile })
+    ]
+  });
+}
+
+const logger = createLogger('screenshot_logger.log');
+logger.info('Logger initialized.');
 
 async function autoScroll(page){
   await page.evaluate(async () => {
@@ -132,9 +165,11 @@ async function autoScroll(page){
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     console.log("Taking screenshot...");
+    logger.info('Taking screenshot...');
     await page.screenshot({ path: screenshotPath, fullPage: true });
   } catch (err) {
     console.error(`Failed to take screenshot of ${url}:`, err);
+    logger.error(`Failed to take screenshot of ${url}: ${err.message}`);
   } finally {
     await browser.close();
   }
