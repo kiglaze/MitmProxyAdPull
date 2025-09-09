@@ -31,8 +31,10 @@ def main():
         print("-------------------")
         print(result_text)
         # TODO try out different prompts. Not enough information for what (to make a decision)? Define ads? Define scale better.
-        prompt = ('"On a scale of 1 (least likely) to 10 (most likely), how likely is it that the following text is from an advertisement? '
-                  'Just respond with a number. If there is not enough information, answer with 0. Text: %s"') % json.dumps(result_text)
+        prompt = ('"How likely is it that the following text is from an advertisement? '
+                  'Just respond with a number from 0 to 4, and use the following scale definition: '
+                  '0 = Not enough information, 1 = Clearly not an advertisement, 2 = Low likelihood of being an advertisement, 3 = Moderate likelihood of being an advertisement, 4 = Strong likelihood of being an advertisement.'
+                  'Text: %s"') % json.dumps(result_text)
         make_llm_api_call(api_key_open_ai, prompt)
 
 
