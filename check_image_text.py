@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS image_texts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     filename TEXT NOT NULL,
     text TEXT,
+    image_text_ad_rating INTEGER DEFAULT NULL,
     is_suspected_ad_auto BOOLEAN DEFAULT NULL,
     is_suspected_ad_manual BOOLEAN DEFAULT NULL,
     full_filepath TEXT,
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS image_texts (
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
 ''')
+
 conn.commit()
 
 
