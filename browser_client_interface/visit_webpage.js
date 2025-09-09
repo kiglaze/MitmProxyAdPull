@@ -47,38 +47,46 @@ const logger = createLogger('screenshot_logger.log');
 logger.info('Logger initialized.');
 
 async function autoScroll(page){
-  await page.evaluate(async () => {
-    await new Promise((resolve) => {
-      let totalHeight = 0;
-      const distance = 500;
-      const timer = setInterval(() => {
-        const scrollHeight = document.body.scrollHeight;
-        window.scrollBy(0, distance);
-        totalHeight += distance;
+  async function autoScrollDown() {
+    await page.evaluate(async () => {
+      await new Promise((resolve) => {
+        let totalHeight = 0;
+        const distance = 1000;
+        const timer = setInterval(() => {
+          const scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
 
-        if (totalHeight >= scrollHeight){
-          clearInterval(timer);
-          resolve();
-        }
-      }, 200);
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 50);
+      });
     });
-  });
-  // Scroll back to the top
-  await page.evaluate(async () => {
-    await new Promise((resolve) => {
-      let currentPosition = document.documentElement.scrollTop || document.body.scrollTop;
-      const distance = 500;
-      const timer = setInterval(() => {
-        window.scrollBy(0, -distance);
-        currentPosition -= distance;
+  }
 
-        if (currentPosition <= 0) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 200);
+  async function autoScrollUp() {
+    // Scroll back to the top
+    await page.evaluate(async () => {
+      await new Promise((resolve) => {
+        let currentPosition = document.documentElement.scrollTop || document.body.scrollTop;
+        const distance = 100;
+        const timer = setInterval(() => {
+          window.scrollBy(0, -distance);
+          currentPosition -= distance;
+
+          if (currentPosition <= 0) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 50);
+      });
     });
-  });
+  }
+
+  await autoScrollDown();
+  //await autoScrollUp();
 }
 
 
@@ -138,8 +146,12 @@ async function autoScroll(page){
   console.log(`Visiting page in browser with Puppeteer...`);
   try {
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 180000 });
-    // Auto scroll to the bottom of the page
+    try {
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    } finally {
+      // Replace page.waitForTimeout(5000) with:
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
     console.log("Auto scrolling...");
     await autoScroll(page);
     console.log("Done auto scrolling...");
@@ -161,16 +173,25 @@ async function autoScroll(page){
       };
       await Promise.all(imgs.map(loadImage));
     });
-    console.log("Planned wait...");
-    await new Promise(resolve => setTimeout(resolve, 3000));
+
+  } catch (err) {
+    console.error(`Error occurred: ${err.message}`);
+    logger.error(`Error occurred: ${err.message}`);
+/*    // Attempt to take a screenshot even after timeout
+    try {
+      console.log("Attempting to take a screenshot after timeout...");
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      logger.info('Screenshot taken after timeout.');
+    } catch (screenshotErr) {
+      console.error(`Failed to take screenshot after timeout: ${screenshotErr.message}`);
+      logger.error(`Failed to take screenshot after timeout: ${screenshotErr.message}`);
+    }*/
+  } finally {
 
     console.log("Taking screenshot...");
     logger.info('Taking screenshot...');
     await page.screenshot({ path: screenshotPath, fullPage: true });
-  } catch (err) {
-    console.error(`Failed to take screenshot of ${url}:`, err);
-    logger.error(`Failed to take screenshot of ${url}: ${err.message}`);
-  } finally {
+
     await browser.close();
   }
 })();
