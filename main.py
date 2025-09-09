@@ -83,6 +83,28 @@ content_type_logger = create_logger("content_type.log")
 def sanitize_filename(filename):
     return re.sub(r'[^a-zA-Z0-9_\-\.]', '_', filename)
 
+# TODO: Do "coverage analysis" to make sure all images are being captured. Separate mitm log.
+def save_image(flow: http.HTTPFlow, referrer, content_type: str):
+    """
+    Save image content from the HTTP response.
+    """
+    # Get the file extension based on content-type
+    ext = mimetypes.guess_extension(content_type.split(";")[0]) or ".bin"
+
+    # Create a filename based on URL
+    parsed_url = urllib.parse.urlparse(flow.request.url)
+    filename = f"{parsed_url.netloc}_{os.path.basename(parsed_url.path)}{ext}"
+    filename = filename.replace("/", "_")  # Avoid slashes in filenames
+    if referrer is not None:
+        filepath = os.path.join(SAVE_DIR, sanitize_filename(referrer), filename)
+    else:
+        filepath = os.path.join(SAVE_DIR, "no_referrer", filename)
+
+    # Save the image
+    with open(filepath, "wb") as f:
+        f.write(flow.response.content)
+    image_logger.info(f"Saved image: {filepath}")
+
 def response(flow: http.HTTPFlow):
     custom_value = ctx.options.my_custom_arg
     print(f"[REQUEST] {flow.request.pretty_url}")
@@ -115,25 +137,6 @@ def load(loader):
         help = "A custom argument passed to mitmdump"
     )
 
-def save_image(flow: http.HTTPFlow, referrer, content_type: str):
-    """
-    Save image content from the HTTP response.
-    """
-    # Get the file extension based on content-type
-    ext = mimetypes.guess_extension(content_type.split(";")[0]) or ".bin"
 
-    # Create a filename based on URL
-    parsed_url = urllib.parse.urlparse(flow.request.url)
-    filename = f"{parsed_url.netloc}_{os.path.basename(parsed_url.path)}{ext}"
-    filename = filename.replace("/", "_")  # Avoid slashes in filenames
-    if referrer is not None:
-        filepath = os.path.join(SAVE_DIR, sanitize_filename(referrer), filename)
-    else:
-        filepath = os.path.join(SAVE_DIR, "no_referrer", filename)
-
-    # Save the image
-    with open(filepath, "wb") as f:
-        f.write(flow.response.content)
-    image_logger.info(f"Saved image: {filepath}")
 
 
