@@ -8,20 +8,20 @@ mitmdump -s main.py --listen-port 8082 --set my_custom_arg="<directory_name_for_
 where `<directory_name_for_saved_image_output>` is the directory where you want to save the images (under saved_images).
 
 ... and visit the target website by using the Node JS script command listed below.
-Also, if you have already trusted the certificate for mitmproxy (see preliminary steps), the proxy will be configured by the code in screenshot.js automatically.
+Also, if you have already trusted the certificate for mitmproxy (see preliminary steps), the proxy will be configured by the code in visit_webpage.js automatically.
 
 ### Automate the browser and take a screenshot
 This Node command automatically opens the browser and takes a screenshot of the page at the specified URL. The screenshot is saved in the specified directory.
 ```bash
-    node browser_client_interface/screenshot.js https://www.livescience.com/
+    node browser_client_interface/visit_webpage.js https://www.livescience.com/
 ```
 OR
 ```bash
-    node browser_client_interface/screenshot.js https://www.livescience.com/ /Users/irisglaze/code/thesis/MitmProxyAdPull/browser_client_interface/livescience.png
+    node browser_client_interface/visit_webpage.js https://www.livescience.com/ /Users/irisglaze/code/thesis/MitmProxyAdPull/browser_client_interface/livescience.png
 ```
 
 ### BOTH of previous two steps for multiple URLs (mitmdump and screenshot-taking Node command)
-screenshot_img_save_manager.py
+website_visits_recording_manager.py
 
 Sites to check are in listed in ./urls.txt
 

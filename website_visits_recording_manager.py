@@ -3,8 +3,10 @@ import subprocess
 import argparse
 import os
 import time
+import urllib
 from urllib.parse import urlparse
 from pathlib import Path
+
 
 # DATA GENERATION
 
@@ -38,7 +40,7 @@ def activate_proxy(website, portNum):
     sanitized_website = sanitize_hostname(website)
     logger.info(f"Running command: mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > /dev/null &")
     os.system(
-        # TODO better to save this somewhere besides /dev/null (not saving). We want the original source file itself. Redirect to specified filename (like website name).
+        # TODO (Iris) better to save this somewhere besides /dev/null (not saving). We want the original source file itself. Redirect to specified filename (like website name).
         f"mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > /dev/null &")
 
 
@@ -60,27 +62,30 @@ def is_port_active(instance_port):
 def sanitize_hostname(url):
     try:
         hostname = urlparse(url).hostname or "unknown"
-        return hostname.replace("www.", "").replace(".", "_")
+        # url encode
+        encoded_string = urllib.parse.quote(hostname)
+        return encoded_string
+        #return hostname.replace("www.", "").replace(".", "_")
     except Exception:
         return "invalid"
 
-def take_screenshot(url):
+def visit_webpage(url):
     hostname = sanitize_hostname(url)
     filename = f"{hostname}.png"
     output_path = os.path.join(filename)
 
     try:
         print(f"[+] Capturing {url} → {output_path}")
-        print(f"[*] Running command: node browser_client_interface/screenshot.js {url}")
-        logger.info(f"Running command: node browser_client_interface/screenshot.js {url}")
+        print(f"[*] Running command: node browser_client_interface/visit_webpage.js {url}")
+        logger.info(f"Running command: node browser_client_interface/visit_webpage.js {url}")
         start_time = time.time()  # Record the start time
-        process = subprocess.Popen(["node", "browser_client_interface/screenshot.js", url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(["node", "browser_client_interface/visit_webpage.js", url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # Waits for process to finish
         out, err = process.communicate()
         end_time = time.time()  # Record the end time
         duration = end_time - start_time  # Calculate the duration
         logger.info(f"Node process for URL {url} completed in: {duration:.2f} seconds")
         print(out)
-        process.wait()
     except subprocess.CalledProcessError as e:
         print(f"[!] Failed to capture {url}: {e}")
         logger.error(f"[!] Node process failed to capture {url}: {e}")
@@ -99,7 +104,7 @@ def main():
             deactivate_proxy(PORT_NUM)
         activate_proxy(url, PORT_NUM)
         time.sleep(5)
-        take_screenshot(url)
+        visit_webpage(url)
 
         # Wait for the process to finish
 
