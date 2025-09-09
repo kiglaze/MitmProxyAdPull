@@ -16,6 +16,8 @@
 # need to test for multiple non-ad images. safe screenshots of webpage.
 # need to validate for negative cases, i.e. images that are not ads.
 
+# DATA PARSING
+
 from mitmproxy import http, ctx
 import os
 import mimetypes
