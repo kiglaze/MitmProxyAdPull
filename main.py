@@ -27,7 +27,6 @@ from urllib.parse import urlparse
 
 # Directory to save images
 SAVE_DIR = "saved_images"
-IFRAME_FILE = "saved_iframes.txt"
 
 # Ensure the save directory exists
 os.makedirs(SAVE_DIR, exist_ok=True)
@@ -78,7 +77,6 @@ def create_logger(log_file, log_level=logging.INFO):
 # Creating logs
 image_logger = create_logger("image_saving.log")
 content_type_logger = create_logger("content_type.log")
-iframe_logger = create_logger("iframe_saving.log")
 
 def sanitize_filename(filename):
     return re.sub(r'[^a-zA-Z0-9_\-\.]', '_', filename)
