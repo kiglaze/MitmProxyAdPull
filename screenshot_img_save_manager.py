@@ -6,6 +6,8 @@ import time
 from urllib.parse import urlparse
 from pathlib import Path
 
+# DATA GENERATION
+
 def create_logger(log_file, log_level=logging.INFO):
     """
     Create a new logger with a specified log file and log level.
@@ -36,6 +38,7 @@ def activate_proxy(website, portNum):
     sanitized_website = sanitize_hostname(website)
     logger.info(f"Running command: mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > /dev/null &")
     os.system(
+        # TODO better to save this somewhere besides /dev/null (not saving). We want the original source file itself. Redirect to specified filename (like website name).
         f"mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > /dev/null &")
 
 
