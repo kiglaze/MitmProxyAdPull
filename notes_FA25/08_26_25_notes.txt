@@ -1,0 +1,53 @@
+what type of ads do you see in a particular genre of website
+    keeps in mind that the relatedness of ads in relation to the content of the page could vary by and depend upon the genre of the website.
+    limiting the genre of the website works for a project but not a thesis...
+methods of ad detection already exist?
+    would need to do a comparative study
+
+show the related work
+	what is the new delta
+	what is the plan for execution and evaluation
+
+list each step and technologies
+
+related works
+	- cover the most recent ones. compare my work with state of the art work, not the first in history.
+
+API key: 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
+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
+
+project id:
+proj_CvCQwu1VJAlesrSHMnH12yAX
+
+curl https://api.openai.com/v1/models \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "OpenAI-Organization: org-Q7eOuDfp3us6DwAE3Bpv5qvk" \
+  -H "OpenAI-Project: $PROJECT_ID"
+
+curl https://api.openai.com/v1/models \
+-H "Authorization: Bearer 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" \
+-H "OpenAI-Project: proj_CvCQwu1VJAlesrSHMnH12yAX"
+
+curl https://api.openai.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+    "model": "gpt-4.1",
+    "input": "Tell me a three sentence bedtime story about a unicorn."
+  }'
+
+curl https://api.openai.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer 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" \
+  -d '{
+    "model": "gpt-4.1",
+    "input": "Tell me a three sentence bedtime story about a unicorn."
+  }'
+
+NYT api pw: rbBAkXUd5i@@VFT
+https://developer.nytimes.com/apis
+API key:
+MLAyGDedIdcqjTh6gS71EGhamEcmgaRQ
+
+https://api.nytimes.com/svc/books/v3/lists/overview.json?api-key=MLAyGDedIdcqjTh6gS71EGhamEcmgaRQ
+
