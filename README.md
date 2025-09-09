@@ -57,9 +57,19 @@ check_image_text.py
 brew install tesseract
 ```
 
+### Install ffmpeg for video processing (if needed):
+```bash
+brew install ffmpeg
+```
+
 ### Install requirements.txt file
 ```bash
 pip install -r requirements.txt
+```
+
+### NPM installations
+```bash
+npm install
 ```
 
 ### Puppeteer User Data Directory Setup

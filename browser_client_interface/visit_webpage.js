@@ -51,7 +51,7 @@ async function autoScroll(page){
     await page.evaluate(async () => {
       await new Promise((resolve) => {
         let totalHeight = 0;
-        const distance = 1000;
+        const distance = 50;
         const timer = setInterval(() => {
           const scrollHeight = document.body.scrollHeight;
           window.scrollBy(0, distance);
@@ -61,7 +61,7 @@ async function autoScroll(page){
             clearInterval(timer);
             resolve();
           }
-        }, 50);
+        }, 100);
       });
     });
   }
@@ -71,7 +71,7 @@ async function autoScroll(page){
     await page.evaluate(async () => {
       await new Promise((resolve) => {
         let currentPosition = document.documentElement.scrollTop || document.body.scrollTop;
-        const distance = 100;
+        const distance = 50;
         const timer = setInterval(() => {
           window.scrollBy(0, -distance);
           currentPosition -= distance;
@@ -80,28 +80,37 @@ async function autoScroll(page){
             clearInterval(timer);
             resolve();
           }
-        }, 50);
+        }, 100);
       });
     });
   }
 
   await autoScrollDown();
-  //await autoScrollUp();
+  await autoScrollUp();
 }
 
 
 (async () => {
   const url = process.argv[2];
   let screenshotPath = process.argv[3];
+  let recordingPath = process.argv[4]; // [NEW] optional recording output
+
 
   if (!url) {
     console.error("Please provide a URL.");
     process.exit(1);
   }
 
-  if (!screenshotPath) {
+  if (!screenshotPath || !recordingPath) {
     const hostname = new URL(url).hostname.replace(/^www\./, '');
-    screenshotPath = path.join(__dirname, 'screenshots/', `${hostname}.png`);
+    if (!screenshotPath) {
+      screenshotPath = path.join(__dirname, 'screenshots/', `${hostname}.png`);
+      logger.info(`Screenshot path not provided. Using default: ${screenshotPath}`);
+    }
+    if (!recordingPath) {
+      recordingPath = path.join(__dirname, 'recordings/', `${hostname}.mp4`);
+      logger.info(`Recording path not provided. Using default: ${recordingPath}`);
+    }
   }
 
   // Create the screenshots directory if it doesn't exist
@@ -109,6 +118,12 @@ async function autoScroll(page){
   if (!fs.existsSync(screenshotsDir)) {
     fs.mkdirSync(screenshotsDir, { recursive: true });
     console.log(`Created directory: ${screenshotsDir}`);
+  }
+  // Create the recordings directory if it doesn't exist
+  const recordingsDir = path.join(__dirname, 'recordings/');
+    if (!fs.existsSync(recordingsDir)) {
+    fs.mkdirSync(recordingsDir, { recursive: true });
+    console.log(`Created directory: ${recordingsDir}`);
   }
 
   console.log(`URL: ${url}`);
@@ -144,6 +159,16 @@ async function autoScroll(page){
 
   await page.setViewport({ width: 1366, height: 768 });
   console.log(`Visiting page in browser with Puppeteer...`);
+  // [NEW] Start screencast before navigation so we capture everything, including page load
+  let recorder = null;
+  try {
+    recorder = await page.screencast({ path: recordingPath, fps: 30 }); // requires ffmpeg
+    console.log(`Recording to: ${recordingPath}`);
+    logger.info(`Recording to: ${recordingPath}`);
+  } catch (e) {
+    console.warn(`Failed to start screencast (will continue without video): ${e.message}`);
+    logger.warn(`Failed to start screencast (will continue without video): ${e.message}`);
+  }
   try {
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
     try {
@@ -177,20 +202,21 @@ async function autoScroll(page){
   } catch (err) {
     console.error(`Error occurred: ${err.message}`);
     logger.error(`Error occurred: ${err.message}`);
-/*    // Attempt to take a screenshot even after timeout
-    try {
-      console.log("Attempting to take a screenshot after timeout...");
-      await page.screenshot({ path: screenshotPath, fullPage: true });
-      logger.info('Screenshot taken after timeout.');
-    } catch (screenshotErr) {
-      console.error(`Failed to take screenshot after timeout: ${screenshotErr.message}`);
-      logger.error(`Failed to take screenshot after timeout: ${screenshotErr.message}`);
-    }*/
   } finally {
 
     console.log("Taking screenshot...");
     logger.info('Taking screenshot...');
     await page.screenshot({ path: screenshotPath, fullPage: true });
+
+    // [NEW] Always stop the recorder if it started
+    if (recorder && typeof recorder.stop === 'function') {
+      try {
+        await recorder.stop();
+        console.log("Stopped recording.");
+      } catch (e) {
+        console.warn(`Failed to stop recording cleanly: ${e.message}`);
+      }
+    }
 
     await browser.close();
   }
