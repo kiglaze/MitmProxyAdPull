@@ -20,7 +20,7 @@ def main():
     ''')
 
     # Fetch all results into a variable
-    results = cursor.fetchmany(2)
+    results = cursor.fetchmany(10)
 
     # Print the results (optional)
     print(results)
@@ -30,7 +30,9 @@ def main():
         result_text = result[text_index]
         print("-------------------")
         print(result_text)
-        prompt = '"On a scale of 1 (least likely) to 10 (most likely), how likely is it that the following text is from an advertisement? Just respond with a number. If there is not enough information, answer with 0. Text: %s"' % json.dumps(result_text)
+        # TODO try out different prompts. Not enough information for what (to make a decision)? Define ads? Define scale better.
+        prompt = ('"On a scale of 1 (least likely) to 10 (most likely), how likely is it that the following text is from an advertisement? '
+                  'Just respond with a number. If there is not enough information, answer with 0. Text: %s"') % json.dumps(result_text)
         make_llm_api_call(api_key_open_ai, prompt)
 
 
