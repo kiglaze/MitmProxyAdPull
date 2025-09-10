@@ -4,6 +4,7 @@
 # puppeteer, similar to selinium
 #   use to take care of scrolling to take full page screenshots
 #   r option for replay, to replay the session that you had saved
+import sqlite3
 
 # 2 sets: text of all the images (n images), from n images, 2 datasets: raw image, and text from images using the python library
 # pass raw image to LLM, is this an ad. is this text related to the ad.
@@ -54,6 +55,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+conn = sqlite3.connect('extracted_texts.db')
+cursor = conn.cursor()
+
+# Create table if it doesn't exist
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS image_saved_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    full_filepath TEXT NOT NULL UNIQUE,
+    source_url TEXT NOT NULL,
+    referrer_url TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+)
+''')
+
+conn.commit()
+
+
 
 def create_logger(log_file, log_level=logging.INFO):
     """
@@ -95,7 +114,9 @@ def save_image(flow: http.HTTPFlow, referrer, content_type: str):
     parsed_url = urllib.parse.urlparse(flow.request.url)
     filename = f"{parsed_url.netloc}_{os.path.basename(parsed_url.path)}{ext}"
     filename = filename.replace("/", "_")  # Avoid slashes in filenames
+    sanitized_referrer = ''
     if referrer is not None:
+        sanitized_referrer = sanitize_filename(referrer)
         filepath = os.path.join(SAVE_DIR, sanitize_filename(referrer), filename)
     else:
         filepath = os.path.join(SAVE_DIR, "no_referrer", filename)
@@ -103,6 +124,13 @@ def save_image(flow: http.HTTPFlow, referrer, content_type: str):
     # Save the image
     with open(filepath, "wb") as f:
         f.write(flow.response.content)
+    # Insert the row into the image_saved_data table
+    source_url = flow.request.url if hasattr(flow, "request") and flow.request else ''
+    cursor.execute('''
+        INSERT INTO image_saved_data (filename, full_filepath, source_url, referrer_url)
+        VALUES (?, ?, ?, ?)
+    ''', (filename, filepath, source_url, sanitized_referrer))
+
     image_logger.info(f"Saved image: {filepath}")
 
 def response(flow: http.HTTPFlow):
@@ -128,6 +156,10 @@ def response(flow: http.HTTPFlow):
     # Check if the response is an image
     if content_type.startswith("image/"):
         save_image(flow, referrer_url, content_type)
+
+
+        # Commit the changes to the database
+        conn.commit()
 
 def load(loader):
     loader.add_option(
