@@ -38,10 +38,20 @@ logger = create_logger("website_visit_manager_logger.log")
 def activate_proxy(website, portNum):
     print('Activating proxy...')
     sanitized_website = sanitize_hostname(website)
-    logger.info(f"Running command: mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > ./mitmdumps/{sanitized_website} &")
+    mitmdump_command = f"mitmdump --listen-port {portNum} -w ./mitmdumps/{sanitized_website}"
+    logger.info(f"Running command: {mitmdump_command}")
     os.system(
-        # TODO (Iris) better to save this somewhere besides /dev/null (not saving). We want the original source file itself. Redirect to specified filename (like website name).
-        f"mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={website} > ./mitmdumps/{sanitized_website} &")
+        mitmdump_command)
+    # TODO (Iris) better to save this somewhere besides /dev/null (not saving). We want the original source file itself. Redirect to specified filename (like website name).
+    # TODO (Iris) pass mitmdump output to main.py script. don't insert data into db or make screenshots/recordings until mitmdumps are made from crawler (manager file).
+    # once I have the mitmdump file, then I can the replay with something like: mitmdump -nr ./mitmdumps/www.dictionary.com -s main.py
+    # .venv/bin/mitmdump -nr ./mitmdumps/www.dictionary.com.dump \
+    #   -s main.py \
+    #   --set my_custom_arg=https://www.dictionary.com/e/all-the-words/
+
+    # mitmdump --listen-port 8082 -w ./mitmdumps/www.dictionary.com.dump
+    # curl -x http://127.0.0.1:8082 https://www.dictionary.com/e/all-the-words/ (in other terminal)
+    # in mitmdump terminal, Ctrl+C
 
 
 def deactivate_proxy(instance_port):
