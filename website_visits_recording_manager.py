@@ -38,10 +38,10 @@ logger = create_logger("website_visit_manager_logger.log")
 def activate_proxy(website, portNum):
     print('Activating proxy...')
     sanitized_website = sanitize_hostname(website)
-    logger.info(f"Running command: mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > /dev/null &")
+    logger.info(f"Running command: mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > ./mitmdumps/{sanitized_website} &")
     os.system(
         # TODO (Iris) better to save this somewhere besides /dev/null (not saving). We want the original source file itself. Redirect to specified filename (like website name).
-        f"mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > /dev/null &")
+        f"mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > ./mitmdumps/{sanitized_website} &")
 
 
 def deactivate_proxy(instance_port):
@@ -96,8 +96,6 @@ def main():
     with open("urls_short.txt", "r") as f:
         urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
 
-    command = "node"
-    script_path = "browser_client_interface/screenshot.js"
     for url in urls:
         if is_port_active(PORT_NUM):
             # print('deactivating proxy')
