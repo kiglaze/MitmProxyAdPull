@@ -49,20 +49,42 @@ logger.info('Logger initialized.');
 async function autoScroll(page){
   async function autoScrollDown() {
     await page.evaluate(async () => {
-      await new Promise((resolve) => {
-        let totalHeight = 0;
-        const distance = 50;
-        const timer = setInterval(() => {
-          const scrollHeight = document.body.scrollHeight;
-          window.scrollBy(0, distance);
-          totalHeight += distance;
+      // Pick the element that actually scrolls; fallback to the document
+      const el = (() => {
+        const docEl = document.scrollingElement || document.documentElement || document.body;
+        const cands = Array.from(document.querySelectorAll('*')).filter(e => {
+          try {
+            const s = getComputedStyle(e);
+            const can = /(auto|scroll)/.test(s.overflowY) || /(auto|scroll)/.test(s.overflow);
+            const tall = e.scrollHeight > e.clientHeight + 2;
+            const vis = !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+            return can && tall && vis;
+          } catch { return false; }
+        });
+        return (cands.sort((a,b)=>b.scrollHeight-a.scrollHeight)[0]) || docEl;
+      })();
 
-          if (totalHeight >= scrollHeight) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 100);
-      });
+      const tickMs = 50;
+      const maxMs = 20000;      // hard cap so we don't scroll forever
+      const idleMs = 2000;      // stop if no new content appears for this long
+      const step = Math.max(100, Math.floor(el.clientHeight * 0.8));
+
+      let lastH = el.scrollHeight;
+      let lastChange = Date.now();
+      const start = Date.now();
+
+      while (true) {
+        el.scrollBy(0, step);
+        await new Promise(r => setTimeout(r, tickMs));
+
+        const { scrollTop, clientHeight, scrollHeight } = el;
+        if (scrollHeight > lastH + 5) { lastH = scrollHeight; lastChange = Date.now(); }
+
+        const nearBottom = scrollTop + clientHeight + step >= scrollHeight;
+        const idleTooLong = Date.now() - lastChange >= idleMs;
+        const timedOut = Date.now() - start >= maxMs;
+        if (timedOut || (nearBottom && idleTooLong)) break;
+      }
     });
   }
 
@@ -89,6 +111,22 @@ async function autoScroll(page){
   await autoScrollUp();
 }
 
+/*async function autoScroll(page) {
+  await page.evaluate(async () => {
+    const scrollableElement = document.scrollingElement || document.documentElement || document.body;
+    const step = Math.max(200, Math.floor(window.innerHeight * 0.8)); // Scroll step size
+    const delay = 50; // Delay between scroll steps in milliseconds
+    const maxScrollTime = 15000; // Maximum scroll time in milliseconds
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < maxScrollTime) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollableElement;
+      if (scrollTop + clientHeight >= scrollHeight) break; // Stop if at the bottom
+      scrollableElement.scrollBy(0, step);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  });
+}*/
 
 (async () => {
   const url = process.argv[2];
@@ -172,9 +210,9 @@ async function autoScroll(page){
   try {
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
     try {
-      await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 40000 });
     } finally {
-      // Replace page.waitForTimeout(5000) with:
+      // Added timeout to allow dynamic content to load
       await new Promise(resolve => setTimeout(resolve, 5000));
     }
     console.log("Auto scrolling...");
