@@ -51,7 +51,9 @@ def activate_proxy(website, portNum):
 
     # mitmdump --listen-port 8082 -w ./mitmdumps/www.dictionary.com.dump
     # curl -x http://127.0.0.1:8082 https://www.dictionary.com/e/all-the-words/ (in other terminal)
+    #    Can also try using browser to visit site with proxy settings on. See if this makes images get saved and loaded.
     # in mitmdump terminal, Ctrl+C
+
 
 
 def deactivate_proxy(instance_port):
