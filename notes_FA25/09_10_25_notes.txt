@@ -1,0 +1,22 @@
+completed:
+- fixed bug in screenshots for some slow websites
+- added recording capability
+- automatically adding ad text rating to database
+- making source url accessible from database (will be used for variable 3)
+- played around with scrolling feature and timeouts to try to get runtime for each website to be faster, yet still have ads loading
+- mitmproxy dump files
+
+TODO (Iris):
+
+pass mitmdump output to main.py script. don't insert data into db or make screenshots/recordings until mitmdumps are made from crawler (manager file).
+once I have the mitmdump file, then I can the replay with something like: mitmdump -nr ./mitmdumps/www.dictionary.com.dump -s main.py
+This step should then save images, screenshots, and recordings, along with the corresponding new database data.
+    # .venv/bin/mitmdump -nr ./mitmdumps/www.dictionary.com.dump \
+    #   -s main.py \
+    #   --set my_custom_arg=https://www.dictionary.com/e/all-the-words/
+
+    # mitmdump --listen-port 8082 -w ./mitmdumps/www.dictionary.com.dump
+    # curl -x http://127.0.0.1:8082 https://www.dictionary.com/e/all-the-words/ (in other terminal)
+    #    Can also try using browser to visit site with proxy settings on. See if this makes images get saved and loaded.
+    # in mitmdump terminal, Ctrl+C
+
