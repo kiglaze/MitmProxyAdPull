@@ -103,7 +103,7 @@ def sanitize_filename(filename):
     return re.sub(r'[^a-zA-Z0-9_\-\.]', '_', filename)
 
 # TODO: Do "coverage analysis" to make sure all images are being captured. Separate mitm log.
-def save_image(flow: http.HTTPFlow, referrer, content_type: str):
+def save_image(flow: http.HTTPFlow, filepath_directory, referrer_url, content_type: str):
     """
     Save image content from the HTTP response.
     """
@@ -114,12 +114,7 @@ def save_image(flow: http.HTTPFlow, referrer, content_type: str):
     parsed_url = urllib.parse.urlparse(flow.request.url)
     filename = f"{parsed_url.netloc}_{os.path.basename(parsed_url.path)}{ext}"
     filename = filename.replace("/", "_")  # Avoid slashes in filenames
-    sanitized_referrer = ''
-    if referrer is not None:
-        sanitized_referrer = sanitize_filename(referrer)
-        filepath = os.path.join(SAVE_DIR, sanitize_filename(referrer), filename)
-    else:
-        filepath = os.path.join(SAVE_DIR, "no_referrer", filename)
+    filepath = os.path.join(filepath_directory, filename)
 
     # Save the image
     with open(filepath, "wb") as f:
@@ -129,7 +124,7 @@ def save_image(flow: http.HTTPFlow, referrer, content_type: str):
     cursor.execute('''
         INSERT INTO image_saved_data (filename, full_filepath, source_url, referrer_url)
         VALUES (?, ?, ?, ?)
-    ''', (filename, filepath, source_url, sanitized_referrer))
+    ''', (filename, filepath, source_url, referrer_url))
 
     image_logger.info(f"Saved image: {filepath}")
 
@@ -140,11 +135,14 @@ def response(flow: http.HTTPFlow):
     #print(">>> ", flow.request.method, url)
     #referrer_url = flow.request.headers.get("Referer", None)
     referrer_url = custom_value
+    filepath_directory = None
     if referrer_url is not None:
         sanitized_referrer = sanitize_filename(referrer_url)
-        os.makedirs(os.path.join(SAVE_DIR, sanitized_referrer), exist_ok=True)
+        filepath_directory = os.path.join(SAVE_DIR, sanitized_referrer)
+        os.makedirs(filepath_directory, exist_ok=True)
     else:
-        os.makedirs(SAVE_DIR + "/" + "no_referrer/", exist_ok=True)
+        filepath_directory = os.path.join(SAVE_DIR, "no_referrer")
+        os.makedirs(filepath_directory, exist_ok=True)
 
     """ 
     Intercept HTTP responses and save images.
@@ -155,7 +153,7 @@ def response(flow: http.HTTPFlow):
 
     # Check if the response is an image
     if content_type.startswith("image/"):
-        save_image(flow, referrer_url, content_type)
+        save_image(flow, filepath_directory, referrer_url, content_type)
 
 
         # Commit the changes to the database

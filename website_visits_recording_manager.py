@@ -41,7 +41,7 @@ def activate_proxy(website, portNum):
     logger.info(f"Running command: mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > ./mitmdumps/{sanitized_website} &")
     os.system(
         # TODO (Iris) better to save this somewhere besides /dev/null (not saving). We want the original source file itself. Redirect to specified filename (like website name).
-        f"mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={sanitized_website} > ./mitmdumps/{sanitized_website} &")
+        f"mitmdump -s main.py --listen-port {portNum} --set my_custom_arg={website} > ./mitmdumps/{sanitized_website} &")
 
 
 def deactivate_proxy(instance_port):
