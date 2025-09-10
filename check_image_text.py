@@ -6,7 +6,7 @@ import logging
 import sqlite3
 
 # Directory containing images
-IMAGE_DIR = "./saved_images"
+IMAGE_DIR = "saved_images"
 
 # Ensure the directory exists
 if not os.path.exists(IMAGE_DIR):
