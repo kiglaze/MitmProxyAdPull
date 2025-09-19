@@ -11,7 +11,6 @@ def main():
 
     # Access the variable
     api_key_open_ai = os.getenv("API_KEY_OPENAI")
-    api_key_nytimes = os.getenv("API_KEY_NYTIMES")
 
     conn = sqlite3.connect('../extracted_texts.db')
     cursor = conn.cursor()
@@ -19,8 +18,9 @@ def main():
     SELECT * FROM image_texts;
     ''')
 
+    rows_limit = 5
     # Fetch all results into a variable
-    results = cursor.fetchmany(10)
+    results = cursor.fetchmany(rows_limit)
 
     # Print the results (optional)
     print(results)
@@ -36,7 +36,7 @@ def main():
         print(result_text)
 
         if image_text_ad_rating is None:
-            # TODO try out different prompts. Not enough information for what (to make a decision)? Define ads? Define scale better.
+            # TODO (Iris -- addressed) try out different prompts. Not enough information for what (to make a decision)? Define ads? Define scale better.
             prompt = ('"How likely is it that the following text is from an advertisement? '
                       'Just respond with a number from 0 to 4, and use the following scale definition: '
                       '0 = Not enough information, 1 = Clearly not an advertisement, 2 = Low likelihood of being an advertisement, 3 = Moderate likelihood of being an advertisement, 4 = Strong likelihood of being an advertisement.'
