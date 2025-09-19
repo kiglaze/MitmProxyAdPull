@@ -132,7 +132,8 @@ def response(flow: http.HTTPFlow):
     custom_value = ctx.options.my_custom_arg
     print(f"[REQUEST] {flow.request.pretty_url}")
     url = flow.request.url
-    #print(">>> ", flow.request.method, url)
+    # print(">>>>>>>\n>>>>>>>>\n")
+    # print(">>> ", flow.request.method, url)
     #referrer_url = flow.request.headers.get("Referer", None)
     referrer_url = custom_value
     filepath_directory = None
@@ -153,6 +154,7 @@ def response(flow: http.HTTPFlow):
 
     # Check if the response is an image
     if content_type.startswith("image/"):
+        print(">>>>>>>\n>>>>>>>>\n")
         save_image(flow, filepath_directory, referrer_url, content_type)
 
 
