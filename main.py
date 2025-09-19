@@ -70,6 +70,15 @@ CREATE TABLE IF NOT EXISTS image_saved_data (
 )
 ''')
 
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS websites_visited (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_url TEXT NOT NULL UNIQUE,
+    mitmdump_filepath TEXT NOT NULL UNIQUE,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+)
+''')
+
 conn.commit()
 
 
