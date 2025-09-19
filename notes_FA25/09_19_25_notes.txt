@@ -1,0 +1,10 @@
+
+To see visually the mitmdump file is valid:
+```
+mitmweb -r /Users/irisglaze/code/thesis/MitmProxyAdPull/mitmdumps/www.dictionary.com.dump
+```
+OR
+```
+mitmdump -r /Users/irisglaze/code/thesis/MitmProxyAdPull/mitmdumps/www.dictionary.com.dump
+```
+
