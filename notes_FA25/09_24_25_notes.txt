@@ -1,0 +1,6 @@
+goals for week and next 2 weeks:
+- help Ahsan get the code to work on his machine. also I can make sure it works on a VM or other Mac I can access. (priority 1)
+    - once this happens, can run code on additional server for 100 sites.
+- keep working on variable II (context of site compared against context of ad text). check with Min if NLP or LLM is sufficient.
+- next 2 weeks: website for data collection. next 1 week: frontend of the site.
+
