@@ -65,8 +65,10 @@ CREATE TABLE IF NOT EXISTS image_saved_data (
     filename TEXT NOT NULL,
     full_filepath TEXT NOT NULL UNIQUE,
     source_url TEXT NOT NULL,
+    source_url_rating INTEGER DEFAULT NULL,
     referrer_url TEXT NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    
 )
 ''')
 

@@ -15,10 +15,10 @@ def main():
     conn = sqlite3.connect('../extracted_texts.db')
     cursor = conn.cursor()
     cursor.execute('''
-    SELECT * FROM image_texts;
+        SELECT * FROM image_texts;
     ''')
 
-    rows_limit = 5
+    rows_limit = 10
     # Fetch all results into a variable
     results = cursor.fetchmany(rows_limit)
 
@@ -49,11 +49,44 @@ def main():
                 WHERE id = ?
             ''', (image_text_ad_rating, id_value))
 
+
+
+
             # Commit the changes to the database
             conn.commit()
 
     # url = 'https://api.nytimes.com/svc/books/v3/lists/overview.json?api-key=' + api_key_nytimes
     # command = ['curl', url]
+
+
+    cursor.execute('''
+        SELECT * FROM image_texts it
+        LEFT JOIN image_saved_data isd ON isd.full_filepath = it.full_filepath
+        WHERE isd.source_url_rating IS NULL
+    ''')
+    results = cursor.fetchall()
+    print(results)
+    for result in results:
+        id_index = 9
+        id_img_saved_data = result[id_index]
+        source_url_idx = 12
+        source_url = result[source_url_idx]
+        referrer_url_idx = 14
+        referrer_url = result[referrer_url_idx]
+        source_url_rating_prompt = (f'"How likely is it that the following source URL is from an advertisement server? '
+                                    f'The main website URL is {json.dumps(referrer_url)}. '
+                                    f'Just respond with a number from 0 to 4, and use the following scale definition: '
+                                    f'0 = Not enough information, 1 = Clearly not from an ad server, 2 = Low likelihood of being from an ad server, 3 = Moderate likelihood of being from an ad server, 4 = Strong likelihood of being from an ad server.'
+                                    f'Image source URL: {json.dumps(source_url)}"')
+        source_url_rating = make_llm_api_call(api_key_open_ai, source_url_rating_prompt)
+        print(source_url)
+        print(source_url_rating)
+        cursor.execute('''
+            UPDATE image_saved_data
+            SET source_url_rating = ?
+            WHERE id = ?
+        ''', (source_url_rating, id_img_saved_data))
+        conn.commit()
 
     # prompt = '"Tell me a three sentence bedtime story about a unicorn."'
     # make_llm_api_call(api_key_open_ai, prompt)
@@ -80,6 +113,8 @@ def make_llm_api_call(api_key_open_ai, prompt):
         decoded_response = json.loads(result.stdout)
         text_response = decoded_response.get("output", {})[0].get("content", {})[0].get("text", "")
         number_rating = int(text_response)
+        print("PROMPT: ")
+        print(prompt)
         print(number_rating)
         return number_rating
     except subprocess.CalledProcessError as e:
