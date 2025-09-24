@@ -65,7 +65,7 @@ async function autoScroll(page){
       })();
 
       const tickMs = 50;
-      const maxMs = 20000;      // hard cap so we don't scroll forever
+      const maxMs = 40000;      // hard cap so we don't scroll forever
       const idleMs = 2000;      // stop if no new content appears for this long
       const step = Math.max(100, Math.floor(el.clientHeight * 0.8));
 
@@ -210,7 +210,7 @@ async function autoScroll(page){
   try {
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
     try {
-      await page.goto(url, { waitUntil: 'networkidle2', timeout: 40000 });
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
     } finally {
       // Added timeout to allow dynamic content to load
       await new Promise(resolve => setTimeout(resolve, 5000));
