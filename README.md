@@ -83,6 +83,18 @@ Launch Chrome manually once with the user data directory:
   --user-data-dir="/Users/irisglaze/puppeteer-profile"
 ```
 
+### After installations (to avoid sources of possible snags)
+Make sure mitmdumps directory exists
+Make sure certificate is up to date. If not, reinstall it.
+    To reinstall:
+        Run mitmdump server:
+        ```bash
+        mitmdump --listen-port 8082
+        ```
+        Go to http://mitm.it/
+Make sure --user-data-dir referenced in browser_client_interface/visit_webpage.js is correct for your puppeteer user data directory, on your machine.
+    
+
 ------------------
 ## Notes to Self: ...
 puppeteer (or selenium)
