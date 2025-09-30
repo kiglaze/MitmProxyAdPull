@@ -5,3 +5,4 @@
 - add html_mitmdumps file names to database with websites_visited table.
 - work on html call to add website "context" to database for each website visited - via "UPDATE" statements.
 - start on Vue.js front end, for data collection site
+- run code for 25-50 websites to get more data in the database
