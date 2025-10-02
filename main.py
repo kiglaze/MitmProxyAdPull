@@ -157,6 +157,21 @@ def response(flow: http.HTTPFlow):
         sanitized_referrer = sanitize_filename(referrer_url)
         filepath_directory = os.path.join(SAVE_DIR, sanitized_referrer)
         os.makedirs(filepath_directory, exist_ok=True)
+        if url == custom_value and flow.request.method == "GET":
+            print(f"Matched response for URL: {flow.request.url}")
+            logger.info(f"Matched response for URL: {flow.request.url}")
+            content_type = flow.response.headers.get("content-type", "")
+            if content_type.startswith("text/html"):
+                print(flow.response.text)
+                logger.info(f"Matched response for HTML: {flow.response.text}")
+                html_dir = "html_mitmdumps"
+                os.makedirs(html_dir, exist_ok=True)
+                html_mitmdump_filepath = os.path.join(html_dir, f"{sanitized_referrer}.html")
+                with open(html_mitmdump_filepath, "w", encoding="utf-8") as f:
+                    f.write(flow.response.text)
+                    cursor.execute('''
+                        UPDATE websites_visited SET website_html_mitmdump_filepath = ? WHERE website_url = ?
+                    ''', (html_mitmdump_filepath, url))
     else:
         filepath_directory = os.path.join(SAVE_DIR, "no_referrer")
         os.makedirs(filepath_directory, exist_ok=True)
