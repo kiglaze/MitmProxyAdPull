@@ -80,6 +80,8 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS websites_visited (
     website_url TEXT PRIMARY KEY,
     mitmdump_filepath TEXT NOT NULL UNIQUE,
+    website_html_mitmdump_filepath TEXT DEFAULT NULL,
+    website_context_description TEXT DEFAULT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
 ''')
