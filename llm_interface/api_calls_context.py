@@ -58,11 +58,48 @@ def main():
                 conn.commit()
     conn.commit()
 
+
+    # Now comparing image text with website context
+    cursor.execute('''
+    SELECT
+        it.id AS image_text_id,
+        it.full_filepath,
+        it.text,
+        it.context_match_rating,
+        wv.website_url,
+        wv.website_context_description
+    FROM image_texts it
+    LEFT JOIN image_saved_data isd ON isd.full_filepath = it.full_filepath
+    LEFT JOIN websites_visited wv ON wv.website_url = isd.referrer_url
+    WHERE it.context_match_rating IS NULL AND wv.website_context_description IS NOT NULL;
+    ''')
+
+
+    # Fetch all results into a variable
+    # rows_limit = 4
+    # image_text_website_context_rows = cursor.fetchmany(rows_limit)
+    image_text_website_context_rows = cursor.fetchall()
+    commit_interval = 25
+    for i, image_text_website_context_row in enumerate(image_text_website_context_rows, start=1):
+        # image_text_index = 2; website_context_index = 5; image_text_id_index = 0
+        image_text_id, _, image_text, _, _, website_context_description = image_text_website_context_row
+        prompt_context_similarity_score = f'On a scale from 0 to 4, where 0 means "Not enough information" and 4 means "Strong similarity", how similar is the context of the following website context summarization to the context of the text in the image? Please respond with just a number from 0 to 4. \nHTML context summarization: {json.dumps(website_context_description)} \nImage text: {json.dumps(image_text)}.'
+        context_match_rating = make_llm_api_call_to_int(api_key_open_ai, prompt_context_similarity_score)
+        print(f"Context match rating: {context_match_rating}")
+
+        cursor.execute('''
+            UPDATE image_texts SET context_match_rating = ? WHERE id = ?
+        ''', (context_match_rating, image_text_id))
+
+        if i % commit_interval == 0:
+            conn.commit()
+
         # ad_suspect_text = """nepo
         # baby
         # """
         # prompt_context_similarity_score = f'On a scale from 0 to 4, where 0 means "Not enough information" and 4 means "Strong similarity", how similar is the context of the following website context summarization to the context of the text in the advertisement? Please respond with just a number from 0 to 4. \nHTML context summarization: {json.dumps(html_context_summarization_text)} \nAd text: {json.dumps(ad_suspect_text)}.'
         # similarity_score_context_text = make_llm_api_call(api_key_open_ai, prompt_context_similarity_score)
+    conn.commit()
     conn.close()
 
 
