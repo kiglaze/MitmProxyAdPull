@@ -10,4 +10,5 @@
 
 additional:
 - add screenshot and video filepaths to database, website_visited table
+    - Perhaps can achieve this by improving filenames used, but also specify this base filename as an argument to the Node command.
 - [x] make sure code also works on Ahsan's computer
