@@ -11,6 +11,7 @@ const fs = require('fs');
 
 // For logging.
 const winston = require('winston');
+require('dotenv').config();
 
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -165,6 +166,10 @@ async function autoScroll(page){
   }
 
   console.log(`URL: ${url}`);
+
+  const userDataDir = process.env.PUPPETEER_USER_DATA_DIR;
+  console.log(userDataDir);
+
   args = ['--disable-web-security',
     '--disable-application-cache',
     '--media-cache-size=1',
@@ -177,7 +182,7 @@ async function autoScroll(page){
     `--proxy-server=https=127.0.0.1:8082`,
     '--ignore-certificate-errors',
     '--ignore-certificate-errors-spki-list',
-    '--user-data-dir=/Users/irisglaze/puppeteer-profile'
+    `--user-data-dir=${userDataDir}`
   ]
 
   const browser = await puppeteer.launch({
