@@ -38,18 +38,23 @@ logger = logging.getLogger(__name__)
 conn = sqlite3.connect('extracted_texts.db')
 cursor = conn.cursor()
 
+cursor.execute('PRAGMA foreign_keys = ON')
+
 # Create table if it doesn't exist
+# context_match_rating - how well the context of the text in the image matches the context of the website it was found on
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS image_texts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     filename TEXT NOT NULL,
     text TEXT,
     image_text_ad_rating INTEGER DEFAULT NULL,
+    context_match_rating INTEGER DEFAULT NULL,
     is_suspected_ad_auto BOOLEAN DEFAULT NULL,
     is_suspected_ad_manual BOOLEAN DEFAULT NULL,
-    full_filepath TEXT,
+    full_filepath TEXT NOT NULL UNIQUE,
     url_visited_directory TEXT,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (full_filepath) REFERENCES image_saved_data(full_filepath)
 )
 ''')
 

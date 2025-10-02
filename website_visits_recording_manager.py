@@ -135,7 +135,8 @@ def get_dumps(conn):
         source_url TEXT NOT NULL,
         source_url_rating INTEGER DEFAULT NULL,
         referrer_url TEXT NOT NULL,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        FOREIGN KEY (referrer_url) REFERENCES websites_visited(website_url)
     )
     ''')
 
@@ -205,7 +206,7 @@ def load_dumps(conn):
 
 def main():
     conn = sqlite3.connect('extracted_texts.db')
-    get_dumps(conn)
+    #get_dumps(conn)
     load_dumps(conn)
     conn.close()
 

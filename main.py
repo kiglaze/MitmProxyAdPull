@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS image_saved_data (
     source_url TEXT NOT NULL,
     source_url_rating INTEGER DEFAULT NULL,
     referrer_url TEXT NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-    
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (referrer_url) REFERENCES websites_visited(website_url)
 )
 ''')
 
