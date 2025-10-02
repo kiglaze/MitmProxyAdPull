@@ -5,6 +5,7 @@
 #   use to take care of scrolling to take full page screenshots
 #   r option for replay, to replay the session that you had saved
 import sqlite3
+import sys
 
 # 2 sets: text of all the images (n images), from n images, 2 datasets: raw image, and text from images using the python library
 # pass raw image to LLM, is this an ad. is this text related to the ad.
@@ -55,6 +56,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+logger.info(f"Arguments received: {sys.argv}")
+print(f"Arguments received: {sys.argv}")
+
 conn = sqlite3.connect('extracted_texts.db')
 cursor = conn.cursor()
 
@@ -74,8 +78,7 @@ CREATE TABLE IF NOT EXISTS image_saved_data (
 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS websites_visited (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    referrer_url TEXT NOT NULL UNIQUE,
+    website_url TEXT PRIMARY KEY,
     mitmdump_filepath TEXT NOT NULL UNIQUE,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 )
