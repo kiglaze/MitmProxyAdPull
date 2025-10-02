@@ -192,12 +192,14 @@ def load_dumps(conn):
         url = row[0]
 
         try:
-            subprocess.run([
+            mitmdump_load_command = [
                 "mitmdump",
                 "-nr", str(dump_file),
                 "-s", "main.py",
                 "--set", f"my_custom_arg={url}"
-            ], check=True)
+            ]
+            logger.info(f"Running command: {' '.join(mitmdump_load_command)}")
+            subprocess.run(mitmdump_load_command, check=True)
         except subprocess.CalledProcessError as e:
             print(f"Error processing {dump_file}: {e}")
 
