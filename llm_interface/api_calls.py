@@ -41,7 +41,7 @@ def main():
                       'Just respond with a number from 0 to 4, and use the following scale definition: '
                       '0 = Not enough information, 1 = Clearly not an advertisement, 2 = Low likelihood of being an advertisement, 3 = Moderate likelihood of being an advertisement, 4 = Strong likelihood of being an advertisement.'
                       'Text: %s"') % json.dumps(result_text)
-            image_text_ad_rating = make_llm_api_call(api_key_open_ai, prompt)
+            image_text_ad_rating = make_llm_api_call_to_int(api_key_open_ai, prompt)
             # Update the image_text_ad_rating for the row with the given id_value
             cursor.execute('''
                 UPDATE image_texts
@@ -78,7 +78,7 @@ def main():
                                     f'Just respond with a number from 0 to 4, and use the following scale definition: '
                                     f'0 = Not enough information, 1 = Clearly not from an ad server, 2 = Low likelihood of being from an ad server, 3 = Moderate likelihood of being from an ad server, 4 = Strong likelihood of being from an ad server.'
                                     f'Image source URL: {json.dumps(source_url)}"')
-        source_url_rating = make_llm_api_call(api_key_open_ai, source_url_rating_prompt)
+        source_url_rating = make_llm_api_call_to_int(api_key_open_ai, source_url_rating_prompt)
         print(source_url)
         print(source_url_rating)
         cursor.execute('''
@@ -88,9 +88,10 @@ def main():
         ''', (source_url_rating, id_img_saved_data))
         conn.commit()
 
-    # prompt = '"Tell me a three sentence bedtime story about a unicorn."'
-    # make_llm_api_call(api_key_open_ai, prompt)
-
+def make_llm_api_call_to_int(api_key_open_ai, prompt):
+    text_response = make_llm_api_call(api_key_open_ai, prompt)
+    number_rating = int(text_response)
+    return number_rating
 
 def make_llm_api_call(api_key_open_ai, prompt):
     url = 'https://api.openai.com/v1/responses'
@@ -112,11 +113,7 @@ def make_llm_api_call(api_key_open_ai, prompt):
         #print(result.stdout)
         decoded_response = json.loads(result.stdout)
         text_response = decoded_response.get("output", {})[0].get("content", {})[0].get("text", "")
-        number_rating = int(text_response)
-        print("PROMPT: ")
-        print(prompt)
-        print(number_rating)
-        return number_rating
+        return text_response
     except subprocess.CalledProcessError as e:
         print("Error:", e.stderr)
 
