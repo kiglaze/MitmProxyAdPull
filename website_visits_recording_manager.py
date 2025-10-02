@@ -145,6 +145,8 @@ def table_setup(conn):
         mitmdump_filepath TEXT NOT NULL UNIQUE,
         website_html_mitmdump_filepath TEXT DEFAULT NULL,
         website_context_description TEXT DEFAULT NULL,
+        screenshot_filepath TEXT DEFAULT NULL,
+        video_filepath TEXT DEFAULT NULL,
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
     )
     ''')
