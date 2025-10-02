@@ -122,8 +122,7 @@ def visit_webpage(url, conn):
         conn.commit()
 
 
-
-def get_dumps(conn):
+def table_setup(conn):
     cursor = conn.cursor()
 
     # Create table if it doesn't exist
@@ -150,10 +149,11 @@ def get_dumps(conn):
     )
     ''')
 
-
-
     conn.commit()
 
+
+def get_dumps(conn):
+    cursor = conn.cursor()
 
     PORT_NUM = 8082
     #with open(args.input, "r") as f:
@@ -206,6 +206,7 @@ def load_dumps(conn):
 
 def main():
     conn = sqlite3.connect('extracted_texts.db')
+    table_setup(conn)
     #get_dumps(conn)
     load_dumps(conn)
     conn.close()
