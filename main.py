@@ -166,12 +166,13 @@ def response(flow: http.HTTPFlow):
                 logger.info(f"Matched response for HTML: {flow.response.text}")
                 html_dir = "html_mitmdumps"
                 os.makedirs(html_dir, exist_ok=True)
-                html_mitmdump_filepath = os.path.join(html_dir, f"{sanitized_referrer}.html")
+                html_mitmdump_filename = f"{sanitized_referrer}.html"
+                html_mitmdump_filepath = os.path.join(html_dir, html_mitmdump_filename)
                 with open(html_mitmdump_filepath, "w", encoding="utf-8") as f:
                     f.write(flow.response.text)
                     cursor.execute('''
                         UPDATE websites_visited SET website_html_mitmdump_filepath = ? WHERE website_url = ?
-                    ''', (html_mitmdump_filepath, url))
+                    ''', (html_mitmdump_filename, url))
     else:
         filepath_directory = os.path.join(SAVE_DIR, "no_referrer")
         os.makedirs(filepath_directory, exist_ok=True)
