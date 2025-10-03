@@ -6,6 +6,7 @@
 #   r option for replay, to replay the session that you had saved
 import sqlite3
 import sys
+from pathlib import Path
 
 # 2 sets: text of all the images (n images), from n images, 2 datasets: raw image, and text from images using the python library
 # pass raw image to LLM, is this an ad. is this text related to the ad.
@@ -167,7 +168,7 @@ def response(flow: http.HTTPFlow):
                 print(flow.response.text)
                 logger.info(f"Matched response for HTML: {flow.response.text}")
                 html_dir = "html_mitmdumps"
-                os.makedirs(html_dir, exist_ok=True)
+                Path(html_dir).mkdir(exist_ok=True)
                 html_mitmdump_filename = f"{sanitized_referrer}.html"
                 html_mitmdump_filepath = os.path.join(html_dir, html_mitmdump_filename)
                 with open(html_mitmdump_filepath, "w", encoding="utf-8") as f:

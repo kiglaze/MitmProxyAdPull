@@ -172,6 +172,8 @@ def get_dumps(conn):
     with open("urls_short.txt", "r") as f:
         urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
 
+    Path("mitmdumps").mkdir(exist_ok=True)
+
     for url in urls:
         if is_port_active(PORT_NUM):
             # print('deactivating proxy')
