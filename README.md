@@ -3,6 +3,8 @@
 see INSTALLATION_INSTRUCTIONS.md file
 ## Order to run the program:
 - website_visits_recording_manager.py
+    - (a) with command getdumps
+    - (b) with command loaddumps
 - check_image_text.py
 - llm_interface/api_calls.py
 - llm_interface/api_calls_context.py
