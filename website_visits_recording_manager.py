@@ -8,6 +8,7 @@ import urllib
 from urllib.parse import urlparse
 from pathlib import Path
 import re
+import argparse
 
 # DATA GENERATION
 
@@ -219,10 +220,18 @@ def load_dumps(conn):
             print(f"Error processing {dump_file}: {e}")
 
 def main():
+    parser = argparse.ArgumentParser(description="Manage website visit dumps")
+    parser.add_argument("command", choices=["getdumps", "loaddumps"], nargs="?", default=None, help="Which action to perform")
+    args = parser.parse_args()
     conn = sqlite3.connect('extracted_texts.db')
     table_setup(conn)
-    #get_dumps(conn)
-    load_dumps(conn)
+    if args.command == "getdumps":
+        get_dumps(conn)
+    elif args.command == "loaddumps":
+        load_dumps(conn)
+    elif args.command is None:
+        get_dumps(conn)
+        load_dumps(conn)
     conn.close()
 
 if __name__ == "__main__":
