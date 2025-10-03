@@ -170,8 +170,15 @@ def get_dumps(conn):
 
     PORT_NUM = 8082
     #with open(args.input, "r") as f:
-    with open("urls.txt", "r") as f:
-        urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+
+    with open("urls_short.txt", "r") as f:
+        urls = []
+        for line in f:
+            url = line.strip()
+            if url and not url.startswith("#"):
+                if not (url.startswith("http://") or url.startswith("https://")):
+                    url = "http://" + url
+                urls.append(url)
 
     Path("mitmdumps").mkdir(exist_ok=True)
 
