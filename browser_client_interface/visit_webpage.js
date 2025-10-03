@@ -182,11 +182,12 @@ async function autoScroll(page){
     `--proxy-server=https=127.0.0.1:8082`,
     '--ignore-certificate-errors',
     '--ignore-certificate-errors-spki-list',
-    `--user-data-dir=${userDataDir}`
+    `--user-data-dir=${userDataDir}`,
+    `--start-fullscreen`
   ]
 
   const browser = await puppeteer.launch({
-    headless: 'new',
+    headless: false,
     args: args,
     executablePath: CHROME_MAC_EXECUTABLE_PATH,
     timeout: 120000,
