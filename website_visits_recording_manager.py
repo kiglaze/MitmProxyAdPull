@@ -42,6 +42,14 @@ def get_dumpfile(website):
     sanitized_website = sanitize_filename(website)
     return f"{sanitized_website}.dump"
 
+def get_screenshot_filename(website):
+    sanitized_website = sanitize_filename(website)
+    return f"{sanitized_website}.png"
+
+def get_video_filename(website):
+    sanitized_website = sanitize_filename(website)
+    return f"{sanitized_website}.mp4"
+
 # Run mitmdump command to get images from visiting site.
 def activate_proxy(website, portNum):
     print('Activating proxy...')
@@ -103,12 +111,14 @@ def visit_webpage(url, conn):
         print(f"[+] Capturing {url} → {output_path}")
         print(f"[*] Running command: node browser_client_interface/visit_webpage.js {url}")
         logger.info(f"Running command: node browser_client_interface/visit_webpage.js {url}")
+        screenshot_filename = os.path.join("browser_client_interface", "screenshots", get_screenshot_filename(url))
+        video_filename = os.path.join("browser_client_interface", "recordings", get_video_filename(url))
         cursor.execute('''
-            INSERT OR IGNORE INTO websites_visited (website_url, mitmdump_filepath)
-            VALUES (?, ?)
-        ''', (url, get_dumpfile(url)))
+            INSERT OR IGNORE INTO websites_visited (website_url, mitmdump_filepath, screenshot_filepath, video_filepath)
+            VALUES (?, ?, ?, ?)
+        ''', (url, get_dumpfile(url), screenshot_filename, video_filename))
         start_time = time.time()  # Record the start time
-        process = subprocess.Popen(["node", "browser_client_interface/visit_webpage.js", url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(["node", "browser_client_interface/visit_webpage.js", url, screenshot_filename, video_filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # Waits for process to finish
         out, err = process.communicate()
         end_time = time.time()  # Record the end time
